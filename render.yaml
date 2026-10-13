@@ -1,0 +1,26 @@
+# Render blueprint: describes the one web service this app needs.
+# Games live in the server's memory, so it must stay a single instance.
+services:
+  - type: web
+    name: kahitster
+    runtime: python
+    plan: free
+    # Same region as the database, and the closest one to Israel.
+    region: frankfurt
+    buildCommand: pip install -r requirements.txt
+    # --proxy-headers: Render terminates HTTPS in front of the app.
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT --proxy-headers --forwarded-allow-ips="*"
+    healthCheckPath: /healthz
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.10
+      # Signs host login cookies; Render invents one and keeps it.
+      - key: SECRET_KEY
+        generateValue: true
+      # The three below are secrets: Render asks for them, they are never in git.
+      - key: DATABASE_URL
+        sync: false
+      - key: SPOTIFY_CLIENT_ID
+        sync: false
+      - key: SPOTIFY_CLIENT_SECRET
+        sync: false
