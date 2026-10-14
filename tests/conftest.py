@@ -49,6 +49,7 @@ def no_spotify_playback(monkeypatch):
     monkeypatch.setattr(spotify, "start_track", offline)
     monkeypatch.setattr(spotify, "pause", offline)
     monkeypatch.setattr(spotify, "list_devices", offline)
+    monkeypatch.setattr(spotify, "names_in", offline)
 
 
 def sign_in(client, monkeypatch, user_id: str) -> dict:

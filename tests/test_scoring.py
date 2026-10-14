@@ -20,7 +20,7 @@ def test_text_points():
 @pytest.mark.parametrize(
     "guess, points",
     [(1985, 500), (1984, 400), (1986, 400), (1987, 300), (1982, 200), (1981, 100),
-     (1990, 100), (1991, 0), (1900, 0), (None, 0)],
+     (1990, 0), (1991, 0), (1900, 0), (None, 0)],
 )
 def test_year_points(guess, points):
     assert year_points(guess, 1985) == points

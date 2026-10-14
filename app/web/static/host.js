@@ -1,4 +1,4 @@
-import { api, h, logo, mount, openSocket, setCountdown, songCover, toast } from "/static/common.js";
+import { api, h, logo, mount, openSocket, setCountdown, songCover, textRule, toast, yearRule, yearsOff } from "/static/common.js";
 
 const pin = location.pathname.split("/")[2];
 const topbar = document.getElementById("topbar");
@@ -64,9 +64,12 @@ const VIEWS = {
         h("div", { class: "chips" }, state.players.map((player) =>
           h("span", { class: `chip ${player.connected ? "" : "off"}` }, player.name,
             h("button", { title: `Remove ${player.name}`, onclick: () => send("kick", { player_id: player.id }) }, "✕")))),
+        h("div", { class: "muted stack" },
+          h("div", null, textRule(state.scoring)),
+          state.guess_year && h("div", null, yearRule(state.scoring))),
         h("div", null,
           h("button", { class: "primary big", disabled: state.players.length === 0, onclick: () => send("start") },
-            `Start · ${state.total} songs`))));
+            `Start · ${state.total} song${state.total === 1 ? "" : "s"}`))));
   },
 
   question() {
@@ -141,7 +144,8 @@ function answersTable() {
           h("td", null, h("strong", null, answer.name)),
           h("td", null, mark(answer, "title"), answer.title || "—"),
           h("td", null, mark(answer, "artist"), answer.artist || "—"),
-          state.guess_year && h("td", null, answer.year ?? "—", answer.year_points ? ` (+${answer.year_points})` : ""),
+          state.guess_year && h("td", null, answer.year ?? "—",
+            answer.years_off != null && h("span", { class: "muted" }, ` · ${yearsOff(answer.years_off)} · +${answer.year_points}`)),
           h("td", { class: "num" }, `+${answer.points}`))
       : h("tr", { class: "muted" },
           h("td", null, answer.name),

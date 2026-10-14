@@ -132,13 +132,13 @@ async def access_token(session: AsyncSession, account_id: int) -> str:
 
 # --- Requests ----------------------------------------------------------------
 
-async def _request(token: str, method: str, url: str, *, json=None, **params):
+async def _request(token: str, method: str, url: str, *, json=None, headers=None, **params):
     resp = await http.get_client().request(
         method,
         url if url.startswith("http") else f"{API_BASE}{url}",
         params=params or None,
         json=json,
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {token}", **(headers or {})},
     )
     if resp.status_code >= 400:
         raise SpotifyError(_explain(resp.status_code, method, url, resp.text), resp.status_code)
@@ -202,6 +202,19 @@ def _songs(items: list[dict]) -> list[dict]:
     # Playlist entries carry the track under "item" (2026 API) or "track".
     songs = (track_to_song(entry.get("item") or entry.get("track")) for entry in items if entry)
     return [song for song in songs if song]
+
+
+async def names_in(token: str, spotify_id: str, language: str) -> dict | None:
+    """A track's title and artists as Spotify shows them in another language.
+
+    Spotify keeps local names for many artists -- "עודד מנשה" as well as
+    "Oded Menashe" -- and picks one by the Accept-Language header.
+    """
+    track = await _request(
+        token, "GET", f"/tracks/{spotify_id}", headers={"Accept-Language": language}
+    )
+    song = track_to_song(track)
+    return {"title": song["title"], "artists": song["artists"]} if song else None
 
 
 async def my_playlists(token: str, user_id: str) -> list[dict]:

@@ -11,7 +11,8 @@ def test_normalize_folds_case_accents_and_articles():
 
 
 def test_normalize_keeps_hebrew():
-    assert normalize("יהלומים בשמיים") == "יהלומים בשמיים"
+    # Letters survive; only final forms fold to their regular ones (ם→מ).
+    assert normalize("יהלומים בשמיים!") == "יהלומימ בשמיימ"
 
 
 @pytest.mark.parametrize(
@@ -74,3 +75,32 @@ def test_artist_accepted(guess, artists):
 )
 def test_artist_rejected(guess, artists):
     assert not matches_artist(guess, artists)
+
+
+def test_hebrew_final_letters_and_geresh_are_forgiven():
+    assert normalize("שלום") == normalize("שלומ")
+    assert matches_title("צה״ל", 'צה"ל')
+    assert matches_artist("גלגלצ", ["גלגל״צ"])
+
+
+@pytest.mark.parametrize(
+    "guess, title",
+    [
+        ("כל הילדים קופצים רוקדים", "הילדים קופצים"),   # a chorus line with the title in it
+        ("hey jude dont", "Hey Jude"),
+    ],
+)
+def test_whole_title_with_a_word_or_two_around_it_counts(guess, title):
+    assert matches_title(guess, title)
+
+
+@pytest.mark.parametrize(
+    "guess, title",
+    [
+        ("הילדים", "הילדים קופצים"),                     # only part of the title
+        ("one two three four hey jude", "Hey Jude"),    # too much extra
+        ("yesterday hey jude let it be help", "Hey Jude"),  # a list of guesses
+    ],
+)
+def test_partial_or_padded_titles_do_not(guess, title):
+    assert not matches_title(guess, title)

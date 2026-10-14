@@ -111,3 +111,17 @@ export function songCover(song, className) {
     ? h("img", { class: className, src: song.image_url, alt: "" })
     : h("div", { class: `noimg ${className || ""}` });
 }
+
+// How the year guess is scored, in words. Numbers come from the server.
+export function yearRule(scoring) {
+  return `Exact year: ${scoring.year} points, ${scoring.year_step} fewer for each year off`;
+}
+
+export function textRule(scoring) {
+  return `Song name and artist: up to ${scoring.title} points each, more for answering fast`;
+}
+
+export function yearsOff(years) {
+  if (years == null) return "";
+  return years === 0 ? "exact year" : `${years} year${years === 1 ? "" : "s"} off`;
+}

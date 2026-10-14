@@ -6,8 +6,10 @@ ARTIST_POINTS = 500
 # A correct answer at the last second is still worth this share of the points.
 SLOWEST_ANSWER_FACTOR = 0.5
 
-# Points by how many years off the guess is; anything further scores nothing.
-YEAR_POINTS = {0: 500, 1: 400, 2: 300, 3: 200, 4: 100, 5: 100}
+# The exact year scores YEAR_POINTS, and each year off costs YEAR_STEP:
+# 2 years off is 300, 5 or more is nothing. Shown to players as this rule.
+YEAR_POINTS = 500
+YEAR_STEP = 100
 
 
 def speed_factor(elapsed: float, limit: float) -> float:
@@ -25,4 +27,20 @@ def text_points(full: int, correct: bool, speed: float) -> int:
 def year_points(guess: int | None, actual: int | None) -> int:
     if guess is None or actual is None:
         return 0
-    return YEAR_POINTS.get(abs(guess - actual), 0)
+    return max(0, YEAR_POINTS - YEAR_STEP * years_off(guess, actual))
+
+
+def years_off(guess: int | None, actual: int | None) -> int | None:
+    if guess is None or actual is None:
+        return None
+    return abs(guess - actual)
+
+
+def rules() -> dict:
+    """The numbers the screens need to explain scoring to players."""
+    return {
+        "title": TITLE_POINTS,
+        "artist": ARTIST_POINTS,
+        "year": YEAR_POINTS,
+        "year_step": YEAR_STEP,
+    }

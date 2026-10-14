@@ -1,4 +1,4 @@
-import { h, mount, openSocket, setCountdown, songCover } from "/static/common.js";
+import { h, mount, openSocket, setCountdown, songCover, textRule, yearRule, yearsOff } from "/static/common.js";
 
 const pin = location.pathname.split("/")[2];
 const app = document.getElementById("app");
@@ -75,7 +75,10 @@ const songNumber = () => `Song ${state.index + 1} of ${state.total}`;
 const VIEWS = {
   lobby: () => h("div", { class: "center stack" },
     h("p", { class: "hero" }, `You're in, ${state.name}!`),
-    h("p", { class: "muted" }, "See your name on the big screen? The game starts soon.")),
+    h("p", { class: "muted" }, "See your name on the big screen? The game starts soon."),
+    h("div", { class: "notice small stack" },
+      h("div", null, textRule(state.scoring)),
+      state.guess_year && h("div", null, yearRule(state.scoring)))),
 
   question: () => (state.answered ? locked() : answerForm()),
 
@@ -128,7 +131,7 @@ function yearPicker() {
   return {
     value: () => Number(range.value),
     el: h("div", { class: "stack" },
-      h("div", { class: "muted" }, "What year did it come out?"),
+      h("div", null, "What year did it come out?", h("div", { class: "muted small" }, yearRule(state.scoring))),
       h("div", { class: "yearpick" }, nudge(-1, "One year earlier"), out, nudge(1, "One year later")),
       range),
   };
@@ -157,7 +160,9 @@ function renderResult() {
         ? [
             verdict("Song", result.title, result.title_ok, result.title_points),
             verdict("Artist", result.artist, result.artist_ok, result.artist_points),
-            state.guess_year && verdict("Year", result.year, result.year_points > 0, result.year_points),
+            state.guess_year && verdict("Year",
+              result.year != null && [result.year, result.years_off != null && ` · ${yearsOff(result.years_off)}`],
+              result.year_points > 0, result.year_points),
           ]
         : h("p", { class: "center muted" }, "You didn't answer this one."),
       h("div", { class: "center" }, h("div", { class: "points" }, `+${result.points}`),

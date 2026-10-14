@@ -50,6 +50,8 @@ class Answer:
     # Share of the title/artist points kept for answering this fast.
     speed: float
     year_points: int
+    # How far the year guess was from the real one; None if either is unknown.
+    years_off: int | None = None
 
     @property
     def title_points(self) -> int:
@@ -265,6 +267,7 @@ class Game:
             ),
             speed=scoring.speed_factor(self._clock() - self._started, self.seconds),
             year_points=scoring.year_points(year, song.get("year")),
+            years_off=scoring.years_off(year, song.get("year")),
         )
 
     def everyone_answered(self) -> bool:
@@ -314,6 +317,7 @@ class Game:
             "guess_year": self.guess_year,
             "index": self.index,
             "total": len(self.songs),
+            "scoring": scoring.rules(),
         }
         if self.phase is Phase.QUESTION:
             state["duration"] = self.seconds
@@ -396,6 +400,7 @@ def _answer_view(answer: Answer | None) -> dict:
         "title_points": answer.title_points,
         "artist_points": answer.artist_points,
         "year_points": answer.year_points,
+        "years_off": answer.years_off,
         "points": answer.points,
     }
 

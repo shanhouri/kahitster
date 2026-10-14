@@ -64,5 +64,7 @@ class QuizSong(Base):
     # Other spellings the host is willing to accept, e.g. a transliteration.
     extra_titles: Mapped[list[str]] = mapped_column(JSON, default=list)
     extra_artists: Mapped[list[str]] = mapped_column(JSON, default=list)
+    # Whether names in the second language were looked up (services/names.py).
+    names_checked: Mapped[bool] = mapped_column(default=False)
 
     quiz: Mapped[Quiz] = relationship(back_populates="songs")

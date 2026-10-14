@@ -44,12 +44,21 @@ async def get_session() -> AsyncGenerator[AsyncSession, None]:
         yield session
 
 
+# Columns added after the first release: (table, column, SQL definition).
+# create_all only makes missing tables, so existing databases get these here.
+_ADDED_COLUMNS = [
+    # Quizzes from before hosts had accounts go to whoever signs in first
+    # (see api/auth.py).
+    ("quizzes", "owner_id", "INTEGER REFERENCES accounts(id)"),
+    ("quiz_songs", "names_checked", "BOOLEAN NOT NULL DEFAULT FALSE"),
+]
+
+
 def _upgrade(conn) -> None:
-    # Databases created before quizzes had owners lack the column. Their
-    # quizzes are handed to whoever signs in first (see api/auth.py).
-    columns = {column["name"] for column in inspect(conn).get_columns("quizzes")}
-    if "owner_id" not in columns:
-        conn.execute(text("ALTER TABLE quizzes ADD COLUMN owner_id INTEGER REFERENCES accounts(id)"))
+    inspector = inspect(conn)
+    for table, column, definition in _ADDED_COLUMNS:
+        if column not in {c["name"] for c in inspector.get_columns(table)}:
+            conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {column} {definition}"))
 
 
 async def init_db() -> None:

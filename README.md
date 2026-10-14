@@ -129,10 +129,17 @@ the song that is playing.
 |---|---|
 | Song name | up to 500, sliding to 250 for the slowest answer |
 | Artist (any one credited artist) | up to 500, same slide |
-| Year | exact 500, ±1 400, ±2 300, ±3 200, ±4–5 100 |
+| Year | 500 for the exact year, 100 fewer for each year off (2 years off: 300; 5 or more: 0) |
 
 Spelling is forgiving: case, accents, punctuation and suffixes like
 "- Remastered 2011" are ignored, and longer names allow one to three typos.
+Hebrew final letters and geresh marks don't matter, and a guess that contains
+the whole title with a word or two around it (a line from the chorus) counts.
+
+Names are accepted in English and Hebrew: when songs are added, the app asks
+Spotify for their Hebrew names too ("עודד מנשה" for "Oded Menashe") and adds
+any it has to the song's accepted answers, visible under **⋯** in the editor.
+Set `OTHER_NAMES_LANGUAGE` to another language code, or empty to turn it off.
 The rules are in `app/services/scoring.py` and `app/services/matching.py`.
 
 ## Limits

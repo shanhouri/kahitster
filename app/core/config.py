@@ -33,6 +33,10 @@ class Settings(BaseSettings):
     render_external_url: str = ""
     port: int = 8000
 
+    # Song and artist names in this language are accepted too, when Spotify
+    # has them ("עודד מנשה" for "Oded Menashe"). Empty turns it off.
+    other_names_language: str = "he"
+
     # Signs host login cookies. Must be set when hosted; see secret_key().
     secret_key: str = ""
 

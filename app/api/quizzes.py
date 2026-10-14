@@ -12,6 +12,7 @@ from app.core.database import get_session
 from app.core.security import current_host
 from app.integrations import spotify
 from app.models import Account, Quiz, QuizSong
+from app.services import names
 from app.schemas import (
     QuizCreate,
     QuizOut,
@@ -73,6 +74,10 @@ async def create_quiz(
 
 @router.get("/quizzes/{quiz_id}", response_model=QuizOut)
 async def get_quiz(quiz: Quiz = Depends(load_quiz)):
+    # Picks up songs added before other-language names existed, or left over
+    # from a run that was cut short.
+    if any(not song.names_checked for song in quiz.songs):
+        names.schedule(quiz.id, quiz.owner_id)
     return quiz
 
 
@@ -115,6 +120,8 @@ async def add_songs(
         position += 1
         added += 1
     await session.commit()
+    if added:
+        names.schedule(quiz.id, quiz.owner_id)
     return {"added": added, "skipped": len(body.songs) - added}
 
 
